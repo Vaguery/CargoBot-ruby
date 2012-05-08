@@ -15,3 +15,10 @@ Feature: Loading script
     And subroutine 2 should have 1 token
     And subroutine 3 should have 0 tokens
     And subroutine 4 should have 1 token
+    
+  Scenario: later script steps are appended to subroutines
+    Given the bot is created with script "R prog_2 L L L L prog_1 R R"
+    Then the bot's program should have 2 subroutines
+    And subroutine 1 should have tokens [:R, :R, :R]
+    And subroutine 2 should have tokens [:L, :L, :L, :L]
+  
