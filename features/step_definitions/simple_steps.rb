@@ -21,7 +21,7 @@ When /^I activate the cargobot$/ do
 end
 
 
-Then /^the bot's program should have (\d+) subroutine$/ do |arg1|
+Then /^the bot's program should have (\d+) subroutines?$/ do |arg1|
   @bot.program.length.should == arg1.to_i
 end
 
@@ -31,7 +31,7 @@ Then /^the number of moves should be (\d+)$/ do |arg1|
 end
 
 
-Then /^subroutine (\d+) should have (\d+) tokens$/ do |arg1, arg2|
+Then /^subroutine (\d+) should have (\d+) tokens?$/ do |arg1, arg2|
   @bot.program[arg1.to_i-1].length.should == arg2.to_i
 end
 

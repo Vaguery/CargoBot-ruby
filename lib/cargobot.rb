@@ -15,7 +15,18 @@ class Cargobot
     @program = [[]]
     subroutine = 0
     @script.split.each do |token|
-      @program[subroutine] << token.intern
+      if token =~ /prog_(\d)/
+        subroutine = $1.to_i-1
+        add_subroutines_as_needed(subroutine)
+      else
+        @program[subroutine] << token.intern
+      end
+    end
+  end
+  
+  def add_subroutines_as_needed(needed_subroutine)
+    (0..needed_subroutine).each do |s|
+      @program[s] = [] if @program[s].nil?
     end
   end
   
