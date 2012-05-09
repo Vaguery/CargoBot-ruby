@@ -1,6 +1,21 @@
-Given /^the bot is created with script "([^"]*)"$/ do |arg1|
-  @bot = Cargobot.new(arg1)
+module LongProgram
+  def long_program
+    @long_program ||= "R " * 500
+  end
 end
+
+World(LongProgram)
+
+
+Given /^the bot is created with script "([^"]*)"$/ do |arg1|
+  @bot = CargoBot.new(arg1)
+end
+
+
+Given /^the bot is created with script a very long program and (\d+) stacks$/ do |arg1|
+  @bot = CargoBot.new(long_program, stacks:arg1.to_i.times.collect {[]})
+end
+
 
 
 Given /^the claw is in position (\d+)$/ do |arg1|
@@ -20,8 +35,8 @@ Given /^the bot has (\d+) stacks$/ do |arg1|
 end
 
 
-Given /^the bot is created with script "([^"]*)" and (\d+) stacks$/ do |arg1, arg2|
-  @bot = Cargobot.new(arg1,stacks:arg2.to_i.times.collect {[]})
+Given /^the bot is created with script "([^"]*)" and (\d+) stacks?$/ do |arg1, arg2|
+  @bot = CargoBot.new(arg1,stacks:arg2.to_i.times.collect {[]})
 end
 
 
@@ -35,9 +50,38 @@ Given /^the step limit is (\d+)$/ do |arg1|
 end
 
 
+Given /^the goal is '(\[.+\])'$/ do |arg1|
+  @bot.goal = eval(arg1)
+end
+
+
+Given /^the bot has a fragile claw$/ do
+  @bot.fragile_crashes = true
+end
+
+
+Given /^the stacks topple the claw bumps them at their height limit$/ do
+  @bot.fragile_stacks = true
+end
+
+
+Given /^the bot has a height limit of (\d+)$/ do |arg1|
+  @bot.height_limit = arg1.to_i
+end
+
+
+Given /^stack (\d+) contains (\[.+\])$/ do |arg1,arg2|
+  @bot.stacks[arg1.to_i-1] = eval(arg2)
+end
+
+
+
+
+
 
 When /^I activate the cargobot$/ do
   @bot.activate
+  
 end
 
 
@@ -101,6 +145,17 @@ Then /^stack (\d+) should be empty$/ do |arg1|
   @bot.stacks[arg1.to_i-1].should be_empty
 end
 
+
 Then /^the stack trace should contain (\d+) items$/ do |arg1|
   @bot.stack_trace.length.should == arg1.to_i
+end
+
+
+Then /^the number of topples should be (\d+)$/ do |arg1|
+  @bot.topples.should == arg1.to_i
+end
+
+
+Then /^the stacks should be (\[.+\])$/ do |arg1|
+  @bot.stacks.should == eval(arg1)
 end
