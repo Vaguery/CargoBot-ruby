@@ -21,7 +21,8 @@ class CargoBot
   def reset_state(args)
     @pointer = args[:pointer] || Pointer.new(0,0)
     @stacks = args[:stacks] || [[]]
-    @old_stacks = args[:stacks].collect {|stack| stack.clone} || [[]]
+    @old_stacks = [[]] 
+    @old_stacks = args[:stacks].collect {|stack| stack.clone} if args[:stacks]
     @goal = args[:goal] || [[:no, :goal, :was, :set]]
     @claw_position = args[:claw_position] || 0
     @claw_holding = args[:claw_holding] || nil
