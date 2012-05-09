@@ -10,4 +10,9 @@ describe "running branching scripts" do
     c.activate
     c.steps.should == 8
   end
+  
+  it "should not branch if the called subroutine doesn't exist" do
+    c = CargoBot.new("call4 R", stacks:[[:b],[]])
+    lambda { c.activate }.should_not raise_error
+  end
 end

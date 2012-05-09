@@ -119,6 +119,7 @@ class CargoBot
   
   
   def handle_call(which)
+    return if which >= @program.length
     @stack_trace.push @pointer.clone
     @pointer.subroutine = which
     @pointer.step = -1
@@ -161,5 +162,19 @@ class CargoBot
       @done = true if @steps >= @step_limit
       @done = true if @stacks == @goal
     end
+  end
+  
+  
+  # convenience function for fancy display
+  def show_off
+    puts "           script: #{@script}"
+    puts "   starting state: #{@old_stacks}"
+    puts "        end state: #{@stacks}"
+    puts "             goal: #{@goal}"
+    puts "            steps: #{@steps}"
+    puts "            moves: #{@moves}"
+    puts "          crashes: #{@crashes}"
+    puts "          topples: #{@topples}"
+    puts "stack_trace_depth: #{@stack_trace.length}"
   end
 end

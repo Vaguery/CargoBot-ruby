@@ -1,18 +1,5 @@
 require_relative '../lib/cargobot'
 
-# convenience function for fancy display
-class CargoBot
-  def show_off
-    puts "           script: #{@script}"
-    puts "   starting state: #{@old_stacks}"
-    puts "        end state: #{@stacks}"
-    puts "            steps: #{@steps}"
-    puts "            moves: #{@moves}"
-    puts "          crashes: #{@crashes}"
-    puts "          topples: #{@topples}"
-    puts "stack_trace_depth: #{@stack_trace.length}"
-  end
-end
 
 
 # Cargo-Bot Tutorial 4
