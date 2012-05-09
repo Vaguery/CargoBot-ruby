@@ -106,6 +106,6 @@ See http://github.com/Vaguery/CargoBot-ruby/tree/master/examples for some simple
 
 ## Quirks
 
-- There may be an inconsistency with the original game's notion of height limits and how they work. I'm checking into this.
+- There may be an inconsistency with the original game's notion of height limits and how they work. In particular, whether a box can be placed "one above" maximum height, as long as the claw "cradles it" and doesn't move away. That is, we know the claw can topple an overheight stack if it approaches from the side; I don't know if there are conditions where a claw is *over* an overheight stack, and will topple it if it moves *away* from it without grabbing the top block....
 
 - It is possible to reach a goal *when a box is still in the claw*. As far as I can tell, this may be possible in the original game as well. So for instance you can make `[[:r, :y], [], []]` into `[[], [:r], []]` and "win".
