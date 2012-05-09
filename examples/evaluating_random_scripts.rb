@@ -75,11 +75,12 @@ setup = [[:b, :r, :b, :b], [], [], [:r, :b, :r, :r]]
 target = [[],[:b, :b, :b, :b],[:r, :r, :r, :r],[]]
 
 
-guesses = 1000.times.collect do
+guesses = 10000.times.collect do
   dude = random_token_array(30).join(" ")
   c = CargoBot.new(dude, stacks:setup.collect {|stack| stack.clone}, goal:target, fragile_claw:true)
   c.activate
   
+  puts "#{cleanup_distance(c.stacks, c.goal)},#{c.steps},#{c.moves},#{c.crashes},#{c.stack_trace.length}"
   {error:cleanup_distance(c.stacks, c.goal),moves:c.moves,dude:c}
 end
 
