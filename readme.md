@@ -16,8 +16,9 @@ So what I've done (with Rui's permission) is build this little emulator that *im
 
 Nothing fancy: no graphics, no special learning algorithms, nothing you couldn't do in a couple of hours yourself, having played his elegant but interesting little puzzle-game.
 
+## Simulating Cargo-bot dynamics
 
-### Scripting language
+### Parsing CargoBot scripts into structured programs
 
 CargoBot scripts in this program are a single string. Tokens recognized by the CargoBot class include:
 - `R`, `L` move the claw right or left one position
@@ -40,9 +41,19 @@ For example, parsing the script `R prog_4 L_red claw call3 prog_2 claw prog_1 R_
     subroutine 3: []
     subroutine 4: [:L_red, :claw, :call3]
 
-Any other token not mentioned here will be placed in a register, but ignored when interpreted.
+Any other token not mentioned here will be placed in a subroutine, but ignored when interpreted.
 
-### Execution
+### Stacks of Boxes
+
+In Cargo-bot (the puzzle game), a single claw is controlled by your Program so that it moves left and right among a discrete and finite set of positions, each located above a pile of boxes of various colors. The claw can lift one box at a time, shift it left or right, and place it on top of a stack at its current position.
+
+In this `CargoBot` representation, the available positions in the "dock" are represented as a simple Array, containing Arrays representing "stacks", containing boxes represented as Symbols naming their color. These are used for initial setup of a puzzle condition, internal representation of dynamic state, and storing the puzzle's goal.
+
+For example, to set up a "factory" with six stacks, where stack 3 contains three blue and stack 4 two red boxes, you can use the Ruby code
+
+    [[], [], [:b, :b, :b], [:r, :r], [], []]
+
+### Program Execution
 
 `CargoBot.activate` places the execution pointer at the first token of the first subroutine, executes it, and moves on. When a `call` token is interpreted, the current pointer is saved in a call stack, and the pointer jumps  to the first token in the called subroutine. When the last token in a called subroutine is executed, the call stack is popped to reset the execution pointer to just after the `call`.
 
@@ -75,7 +86,7 @@ As far as I can tell, all the game's mechanics are captured here, with arguments
 
 Everything but the script itself can be accessed via hash arguments:
 
-- `:stacks` should be set to the initial set of piles of boxes; it should be an Array of Arrays, containing symbols indicating the colors of boxes. The 'top' of a stack is considered to be the right.
+- `:stacks` should be set to the initial set of piles of boxes; it should be an Array of Arrays, containing symbols indicating the colors of boxes. The 'top' of a stack is considered to be the last element, as in Ruby's stack-handling Array methods `Array#pop` and `Array#push`.
 - `:goal` should also be an Array of Arrays of Symbols. Note that if the boxes in the `goal` don't match the `stacks`, your CargoBot might have a problem finishing the puzzle....
 - `:claw_position` is an Integer indicating which stack the claw is above (0-based); default is 0
 - `:claw_holding` is a Symbol indicating what color block the claw is holding, or `nil` if none
@@ -91,3 +102,10 @@ Everything but the script itself can be accessed via hash arguments:
 ## Examples
 
 See http://github.com/Vaguery/CargoBot-ruby/tree/master/examples for some simple calls and demos (TBD). Run [the acceptance test cucumber file](http://github.com/Vaguery/CargoBot-ruby/blob/master/features/acceptance_tests.feature) to check to see that the Cargo-Bot tutorial examples are running.
+
+
+## Quirks
+
+- There may be an inconsistency with the original game's notion of height limits and how they work. I'm checking into this.
+
+- It is possible to reach a goal *when a box is still in the claw*. As far as I can tell, this may be possible in the original game as well. So for instance you can make `[[:r, :y], [], []]` into `[[], [:r], []]` and "win".
