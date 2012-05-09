@@ -87,3 +87,7 @@ Everything but the script itself can be accessed via hash arguments:
 - `:fragile_stacks` is a toggle which determines whether the machine breaks down when it the claw knocks over a stack of blocks that's too high
 - `:height_limit` the maximum height a stack is allowed to get before toppling when the claw bumps it
 - `:step_limit` termination condition to avoid loops; defaults to 200
+
+## Examples
+
+See http://github.com/Vaguery/CargoBot-ruby/tree/master/examples for some simple calls and demos (TBD). Run [the acceptance test cucumber file](http://github.com/Vaguery/CargoBot-ruby/blob/master/features/acceptance_tests.feature) to check to see that the Cargo-Bot tutorial examples are running.
