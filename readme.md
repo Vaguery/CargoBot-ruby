@@ -16,11 +16,6 @@ So what I've done (with Rui's permission) is build this little emulator that *im
 
 Nothing fancy: no graphics, no special learning algorithms, nothing you couldn't do in a couple of hours yourself, having played his elegant but interesting little puzzle-game.
 
-## Creating and activating a CargoBot instance
-
-As far as I can tell, all the game's mechanics are captured here, with arguments and instance variables controlling the behavior and state of the bot's execution:
-
-`CargoBot.new("script")` is the basic call to create an instance
 
 ### Scripting language
 
@@ -45,6 +40,8 @@ For example, parsing the script `R prog_4 L_red claw call3 prog_2 claw prog_1 R_
     subroutine 3: []
     subroutine 4: [:L_red, :claw, :call3]
 
+Any other token not mentioned here will be placed in a register, but ignored when interpreted.
+
 ### Execution
 
 `CargoBot.activate` places the execution pointer at the first token of the first subroutine, executes it, and moves on. When a `call` token is interpreted, the current pointer is saved in a call stack, and the pointer jumps  to the first token in the called subroutine. When the last token in a called subroutine is executed, the call stack is popped to reset the execution pointer to just after the `call`.
@@ -67,4 +64,26 @@ As you may have noticed, there are a few extensions of the `CargoBot` class comp
 - Any symbol can be used as a block 'color' except `:any` or `none`. Any filtered instructions do simple string-matching to trigger, so the token `R_red` will only ever fire if the claw is holding a `:red` block, not a `:r` or some other one
 - Infinite loops are cut off at the `CargoBot#step_limit`
 - The running `CargoBot` instance records the number of `steps` (tokens interpreted), `moves` (L, R and claw moves only), `crashes`, `topples`
-- Any `CargoBot` created without a `#target` has a *very*unlikely target set as a default; it probably won't ever end successfully
+- Any `CargoBot` created without a `#target` has a *very* unlikely target set as a default; it probably won't ever end successfully
+
+
+## Creating and activating a CargoBot instance
+
+As far as I can tell, all the game's mechanics are captured here, with arguments and instance variables controlling the behavior and state of the bot's execution:
+
+`CargoBot.new("script")` is the basic call to create an instance, but it will have no blocks or target.
+
+Everything but the script itself can be accessed via hash arguments:
+
+- `:stacks` should be set to the initial set of piles of boxes; it should be an Array of Arrays, containing symbols indicating the colors of boxes. The 'top' of a stack is considered to be the right.
+- `:goal` should also be an Array of Arrays of Symbols. Note that if the boxes in the `goal` don't match the `stacks`, your CargoBot might have a problem finishing the puzzle....
+- `:claw_position` is an Integer indicating which stack the claw is above (0-based); default is 0
+- `:claw_holding` is a Symbol indicating what color block the claw is holding, or `nil` if none
+- `:moves` is the number of `L`, `R` and `claw` tokens *actually executed*; skipped or filtered instructions aren't counted
+- `:steps` is the count of tokens interpreted (including `calls`)
+- `:crashes` is the number of times the claw tries to "leave the box" by moving left from position 0, or right beyond the last of its `stacks`
+- `:topples` is the number of times the claw tries to enter a stack position where the number of boxes is at least `height_limit`
+- `:fragile_crashes` is a toggle which determines whether the claw breaks (crashing the CargoBot) when it tries to "leave the box"
+- `:fragile_stacks` is a toggle which determines whether the machine breaks down when it the claw knocks over a stack of blocks that's too high
+- `:height_limit` the maximum height a stack is allowed to get before toppling when the claw bumps it
+- `:step_limit` termination condition to avoid loops; defaults to 200
