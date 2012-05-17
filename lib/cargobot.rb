@@ -189,7 +189,7 @@ class CrateStacks
     @stacks = arrangement
   end
   
-  def crate_cleanup_distance(target, stack_number, box_number)
+  def crate_cleanup_error(target, stack_number, box_number)
     stack = stack_number - 1
     box = box_number - 1
     
@@ -221,6 +221,27 @@ class CrateStacks
     end
   end
   
+  
+  def stack_cleanup_error(target, stack_number)
+    stack = stack_number-1
+    
+    extra_boxes = [0,@stacks[stack].length - target.stacks[stack].length].max
+    extras_error = extra_boxes*(extra_boxes+1)/2
+    
+    matches_errors = target.stacks[stack].each_with_index.inject(0) do |sum,(crate,idx)|
+      crate = crate_cleanup_error(target,stack_number,idx+1)
+      sum + crate
+    end
+    
+    extras_error + matches_errors
+  end
+  
+  
+  def cleanup_error(target)
+    target.stacks.each_with_index.inject(0) do |sum,(stack,idx)|
+      sum + stack_cleanup_error(target,idx+1)
+    end
+  end
   
   def topmost_matches(crate)
     @stacks.collect {|s| (s.length - s.rindex(crate)) unless s.rindex(crate).nil?}.compact
