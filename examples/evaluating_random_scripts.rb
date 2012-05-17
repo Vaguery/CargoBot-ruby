@@ -72,7 +72,7 @@ end
 
 # Let's see how this error measure does at finding "close" solutions
 setup = [[:b, :r, :b, :b], [], [], [:r, :b, :r, :r]]
-target = [[],[:b, :b, :b, :b],[:r, :r, :r, :r],[]]
+target = [[],[:b, :b, :b, :r],[:r, :r, :r, :b],[]]
 
 
 guesses = 10000.times.collect do
@@ -92,7 +92,3 @@ best.each do |good_one|
   good_one[:dude].show_off
   puts "\n"
 end
-
-
-# here are some that came up randomly:
-# "claw R R claw R L call2 prog_2 call3 L prog_1 call1 R_r R claw L L R_g R R prog_2 call1_b claw_b L prog_4 R call1 claw claw R"

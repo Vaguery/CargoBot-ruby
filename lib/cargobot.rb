@@ -177,4 +177,53 @@ class CargoBot
     puts "          topples: #{@topples}"
     puts "stack_trace_depth: #{@stack_trace.length}"
   end
+  
+  
+end
+
+
+class CrateStacks
+  attr_accessor :stacks
+  
+  def initialize(arrangement = [[]])
+    @stacks = arrangement
+  end
+  
+  def crate_cleanup_distance(target, stack_number, box_number)
+    stack = stack_number - 1
+    box = box_number - 1
+    
+    expected_box = target.stacks[stack][box]
+    observed_box = @stacks[stack][box]
+    
+    
+    if expected_box == observed_box
+      return 0 
+    else
+      possible_replacements = topmost_matches(expected_box)
+      return 100 if possible_replacements.empty?
+      
+      this_stack_replacement = @stacks[stack].rindex(expected_box).nil? ?
+        nil :
+        @stacks[stack].length - @stacks[stack].rindex(expected_box)
+      adding_missing_boxes = @stacks[stack].length-1 < box ? (box + 1 - @stacks[stack].length) : 0
+      shifting_extra_boxes = @stacks[stack].length-1 > box ? (@stacks[stack].length - box) : 0
+      grabbing_a_replacement = possible_replacements.min
+      if this_stack_replacement == grabbing_a_replacement
+        if this_stack_replacement < shifting_extra_boxes
+          return shifting_extra_boxes + 1
+        else
+          return 2*this_stack_replacement - (@stacks[stack].length-box) + 1
+        end
+      else
+        return shifting_extra_boxes + adding_missing_boxes + grabbing_a_replacement
+      end
+    end
+  end
+  
+  
+  def topmost_matches(crate)
+    @stacks.collect {|s| (s.length - s.rindex(crate)) unless s.rindex(crate).nil?}.compact
+  end
+  
 end
