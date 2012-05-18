@@ -3,13 +3,13 @@ Feature: Cleanup distance
   As a Cargo-Botter
   I want to count the number of moves needed to 'fix' each crate
   
-  Scenario: score is +0 if the target and observed boxes are the same
+  Scenario: +0 if the target and observed boxes are same
     Given the target is [[:r],[]]
     And the observed is [[:r],[]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 0
   
-  Scenario: score is +1 when target wants box that's on top of some other stack
+  Scenario: +2 to retrieve a box from atop another stack
     Given the target is [[:r],[]]
     And the observed is [[],[:r]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
@@ -20,49 +20,49 @@ Feature: Cleanup distance
     When I calculate the cleanup distance for box 2 of stack 1 of the state
     Then the score for that box should be 2
     
-  Scenario: score is +100 when target wants a box that's missing completely in the observed setup
+  Scenario: +100 if target box is totally missing
     Given the target is [[:r]]
     And the observed is [[]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 100
   
-  Scenario: score is number of blocks moved when target lacks a box that's inside some other stack
+  Scenario: count boxes moved when retrieving replacement
     Given the target is [[:r], [:b,:b]]
     And the observed is [[],[:r,:b,:b]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 4
   
-  Scenario: score is MIN number of blocks moved when target lacks a box that's inside 2+ other stacks
+  Scenario: count minimum moves when choosing a replacement
     Given the target is [[:r], [:r, :b, :b], [:g, :r, :g]]
     And the observed is [[],[:r,:r,:b,:b], [:g,:r,:g]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 3
   
-  Scenario: score is TOTAL blocks moved to replace a block from within a stack
+  Scenario: count all moved blocks and replaced blocks
     Given the target is [[:g, :r, :r, :r]]
     And the observed is [[:r, :r, :r, :g]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 5
   
-  Scenario: score is MIN TOTAL blocks moved to replace a block from another stack
+  Scenario: count minimum total moves when choosing a replacement
     Given the target is [[:g, :r, :r, :r], [:b, :b], [:g, :y, :y, :y]]
     And the observed is [[:b, :r, :r, :r], [:g, :b], [:g, :y, :y, :y]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
     Then the score for that box should be 6
   
-  Scenario: score for a block missing supports
+  Scenario: keep track of replaced supporting blocks
     Given the target is [[:r, :r, :b], []]
     And the observed is [[:r], [:b, :r]]
     When I calculate the cleanup distance for box 3 of stack 1 of the state
     Then the score for that box should be 4
   
-  Scenario: score is number of blocks moved when target lacks a box that's inside some other stack
+  Scenario: count every block moved
     Given the target is [[:y, :y, :y, :r], [:b, :b]]
     And the observed is [[], [:y, :y, :y, :r, :b, :b]]
     When I calculate the cleanup distance for box 4 of stack 1 of the state
     Then the score for that box should be 8
   
-  Scenario: score for wrong position in same stack
+  Scenario: don't double-count shifting blocks in same stack
     Given the target is [[:r, :r, :r, :r, :b, :r]]
     And the observed is [[:b, :r, :r, :r, :r, :r]]
     When I calculate the cleanup distance for box 5 of stack 1 of the state
@@ -73,8 +73,7 @@ Feature: Cleanup distance
     When I calculate the cleanup distance for box 3 of stack 1 of the state
     Then the score for that box should be 8
     
-    
-  Scenario: floating block
+  Scenario: ensure a floating block has enough support
     Given the target is [[:r, :r, :r, :b], []]
     And the observed is [[:r], [:r, :b, :r]]
     When I calculate the cleanup distance for box 4 of stack 1 of the state
@@ -96,7 +95,7 @@ Feature: Cleanup distance
     When I calculate the cleanup distance for stack 1 of the state
     Then the score for that stack should be 21
   
-  Scenario: stack scoring should just work
+  Scenario: stack score should be sum of box scores (plus extra charge)
     Given the target is [[:y, :y, :y, :r], [:b, :b]]
     And the observed is [[], [:y, :y, :y, :r, :b, :b]]
     When I calculate the cleanup distance for box 1 of stack 1 of the state
@@ -118,14 +117,13 @@ Feature: Cleanup distance
     Then the score for that stack should be 23
   
   
-  
   Scenario: full setup scoring should add all stack scores
     Given the target is [[:y, :y, :y, :r], [:b, :b]]
     And the observed is [[], [:y, :y, :y, :r, :b, :b]]
     When I calculate the cleanup distance
     Then the score should be 49
     
-  Scenario: the error measure does not have to be symmetric
+  Scenario: the "distance" is not necessarily symmetric
     Given the target is [[], [:y, :y, :y, :r, :b, :b]]
     And the observed is [[:y, :y, :y, :r], [:b, :b]]
     When I calculate the cleanup distance for stack 1 of the state
@@ -137,7 +135,8 @@ Feature: Cleanup distance
     When I calculate the cleanup distance
     Then the score should be 37
   
-  Scenario: it should work for many arrangements
+  
+  Scenario: it should provide a numeric answer for arbitrary rearrangements
     Given I have 100 arbitrary target:objective pairs with 5 stacks and 5 crates each
     When I calculate the cleanup distance for the random pairs
     Then the score should be a numerical value
