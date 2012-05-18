@@ -26,7 +26,7 @@ guesses = 10000.times.collect do
   c.activate
   
   err = CrateStacks.new(c.stacks).cleanup_error(CrateStacks.new c.goal)
-  puts "#{err},#{c.steps},#{c.moves},#{c.crashes},#{c.stack_trace.length}"
+  puts "#{err},#{c.steps},#{c.moves},#{c.crashes}"
   {error:err,moves:c.moves,dude:c}
 end
 

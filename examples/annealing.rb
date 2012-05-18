@@ -29,6 +29,29 @@ end
 # Lay It Out (medium)
 # setup = [[:g,:g,:g,:g,:g,:g],[],[],[],[],[]]
 # target = [[:g],[:g],[:g],[:g],[:g],[:g]]
+# claw_position = 1
+# Successful programs:
+# claw call2 R claw L claw R R R claw L R_any L L call1 R L
+# claw call2 R claw L claw R R call2 R claw L R_any L L call1 L_r R call4
+# claw L_r R claw L claw R R call2 R claw L R_any L L call1 L_r R call4
+# claw L_r R claw L claw R call2 R claw L R_any L call1 L_r R call4
+# claw L_r R claw L claw R call2 R claw L R_any L call1 L_r L_y call4
+# claw L_r R claw L claw R call2 R claw L R_any L call1 R L_y call4
+# claw L_r R claw L claw R call2 R claw L R_any L call1 R L call4
+# claw L_r R claw L claw R call4_r R claw L R_any L call1 R L call4
+# claw L_r R claw L claw R call4_r R claw L R_any L call1 R L call2_none
+# claw L_r R claw L claw R call4_r R claw L R_any L call1 R claw call2_none
+# claw L_r R claw L claw R call4_r R claw L R_any L call1 L_none claw call2_none
+# claw L_r R claw L claw R R claw L R_any L call1 claw call2_none
+# claw R claw L claw R_r R R claw L R_any L call1 claw call2_none
+# claw R claw L claw R_r R R claw L R_any L call1 claw claw
+# claw R claw L claw R_r R R claw L R_any L call1 L
+# claw R claw L claw R_r R R claw L R_any L call1 R_b
+# claw R claw L claw R_r R R claw L L R_any call1 R_b
+# claw R claw L claw R_r R R claw L L R_any call1 call2_none
+# claw R claw L claw R R claw L L R_any call1 call2_none
+# claw R claw L claw R R claw L L R_any call1 L_b
+# claw R claw L claw R R claw call4_none L_none L prog_1 call1 L_b
 
 
 # # Mirror (medium)
@@ -61,14 +84,37 @@ end
 
 # The Swap (crazy)
 # target = [[:g, :g, :g], [], [:r, :r, :r]]
-# setup = [[:r, :r, :r], [], [:g, :g, :g]]
+# setup = [[:r, :r, :r], [],[:g, :g, :g]]
 # claw_position = 2
+# Successful programs:
+# call2_none claw R claw L R_y L claw R call1 R call4
+# claw R claw L R_y L claw R call1 R
+# claw R claw L R_y L claw R call1 claw
+# claw R claw L R_y L claw R prog_1 call1 prog_2
+# claw R claw L R_y L claw R call1 call1 prog_2
+# claw R claw L R_y L claw R call1 call1 R
+# claw R claw L R_y L claw R call1 claw R
+# claw R claw L R_y L claw R call1 R R
+# claw R claw L R_y L claw R call1 R L
+# claw R claw L R_y L claw R call1 prog_4 L
+# claw R claw L R_y L claw R call1 L
+# claw R claw L call4 R_y L claw R call1 L
+# claw R claw L call4 R_y L claw R call1
+# claw R claw L call2 R_y L claw R call1
+# claw R claw L call2 prog_1 L claw R call1
+# claw R claw L prog_4 prog_1 L claw R call1
+# claw R claw L call4_none prog_1 L claw R call1
+# claw R claw L R_r prog_1 L claw R call1
+# claw R claw L R_r R_y L claw R call1
+# claw R claw L R_r call3_y L claw R call1
+# claw R claw L R_r R_b L claw R call1
+
 
 
 # Walking Piles (easy)
-target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
-setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
-claw_position = 1
+# target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
+# setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
+# claw_position = 1
 # Successful programs:
 # call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
 # call3 call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
@@ -91,6 +137,28 @@ claw_position = 1
 # call3 call3 claw L prog_3 R R claw L_none L L claw_none R call3
 # call3 claw L prog_3 R R claw L_none L L claw_none R call3
 # call3 call1 L prog_3 R R claw L_none L L claw_none R call3
+# claw R call3 R_any prog_3 L L_none claw_none R R R claw L call3
+# R R call3 R_any prog_3 L L_none claw_none R R R_none R claw L call3
+# claw R call3 call1 R_b claw_y L L L_none L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 L_r R_b claw_y L L L_none L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 R claw L claw_y R L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw L call3_any claw_y R call3 prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw L call3_any claw_y R L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw L R_none call3_any claw_y R L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw L claw call3_any claw claw_y claw R L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# call4 claw R call3 claw L claw call3_any claw_none claw_y claw L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw call3 claw call3_any claw_none claw_y claw L prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw call3 claw L claw_none claw_y claw L R_r prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw call3 claw call1 claw_none claw_y claw L R_r prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw call3 claw call1 L claw_y claw L R_r prog_1 L prog_3 L_none L claw_none R R R claw L call3
+# claw R_b call3 R prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 R prog_3 L_none L claw_none R R R claw L call3
+# claw R call3 claw_any prog_3 L_none L claw_none R R R claw L call3
+# R_y R R claw_any call3 prog_3 L_none L claw_none R R R claw L call3
+# claw R R_b call3 prog_3 L_none L L claw_none R R R claw call3
+# claw R R L call2_g R_b call3 prog_3 L_none L L claw_none R R R claw call3
+# claw R R L call2 R_b call3 prog_3 L_none L L claw_none R R R claw call3
+
 
 
 
@@ -99,7 +167,7 @@ wildtype = CargoBot.new(wildtype_tokens.join(" "), stacks:setup.collect {|stack|
 wildtype.activate
 wildtype_err = CrateStacks.new(wildtype.stacks).cleanup_error(CrateStacks.new target)
 
-puts "#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.stack_trace.length}"
+puts "#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes}"
 
 
 bests = {wildtype.script => [wildtype_err,wildtype.crashes]}
@@ -110,12 +178,12 @@ until bests.values.count([0,0]) > 20 do
   mutant.activate
   mutant_err = CrateStacks.new(mutant.stacks).cleanup_error(CrateStacks.new target)
   
-  if (mutant_err <= wildtype_err) && (mutant.crashes <= wildtype.crashes) && (bests[mutant.script].nil?)
+  if (mutant_err <= wildtype_err) && (mutant.crashes <= wildtype.crashes+1) && (bests[mutant.script].nil?)
     bests[mutant.script] = [mutant_err,mutant.crashes]
     wildtype_tokens = mutant_tokens
     wildtype = mutant
     wildtype_err = mutant_err
-    puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.stack_trace.length}, #{mutant.script}"
+    puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}, #{mutant.script}"
   end
 end
 

@@ -1,6 +1,6 @@
 class CargoBot
   attr_accessor :script, :program
-  attr_accessor :stacks, :execution_stack
+  attr_accessor :stacks, :starting_stacks, :execution_stack
   attr_accessor :claw_position, :claw_holding
   attr_accessor :moves, :crashes, :steps, :topples, :broken
   attr_accessor :step_limit, :height_limit, :goal, :unstable, :fragile
@@ -10,13 +10,13 @@ class CargoBot
     @script = script
     load_program(script)
     load_args(args)
+    setup_stacks(args[:stacks])
     @execution_stack = []
   end
   
   
   def load_args(args)
     @claw_position = args[:claw_position] || 1
-    @stacks = setup_stacks(args[:stacks])
     @step_limit = args[:step_limit] || 200
     @goal = args[:goal] || [[:no, :goal, :was, :set]]
     @height_limit = args[:height_limit] || 6
@@ -25,8 +25,9 @@ class CargoBot
   end
   
   
-  def setup_stacks(stacks)
-    stacks.nil? ? [[]] : stacks
+  def setup_stacks(arg_stacks)
+    @stacks = arg_stacks.nil? ? [[]] : arg_stacks
+    @starting_stacks = @stacks.collect {|stack| stack.clone}
   end
   
   
@@ -151,6 +152,17 @@ class CargoBot
     else
       # ignore tokens I don't recognize
     end
+  end
+  
+  def show_off
+    puts "           script: #{@script}"
+    puts "   starting state: #{@starting_stacks}"
+    puts "        end state: #{@stacks}"
+    puts "             goal: #{@goal}"
+    puts "            steps: #{@steps}"
+    puts "            moves: #{@moves}"
+    puts "          crashes: #{@crashes}"
+    puts "          topples: #{@topples}"
   end
 end
 
