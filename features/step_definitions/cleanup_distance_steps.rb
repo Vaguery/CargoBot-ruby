@@ -6,7 +6,7 @@ Given /^the observed is (\[.+\])$/ do |arg1|
   @observed = CrateStacks.new eval(arg1)
 end
 
-When /^I calculate the cleanup distance for box (\d+) of stack (\d+) of the state$/ do |arg1, arg2|
+When /^I calculate the cleanup distance for box (\d+) of stack (\d+)$/ do |arg1, arg2|
   @distance = @observed.crate_cleanup_error(@target, arg2.to_i, arg1.to_i)
 end
 
@@ -14,7 +14,7 @@ Then /^the score for that box should be (\d+)$/ do |arg1|
   @distance.should == arg1.to_i
 end
 
-When /^I calculate the cleanup distance for stack (\d+) of the state$/ do |arg1|
+When /^I calculate the cleanup distance for stack (\d+)$/ do |arg1|
   @stackscore = @observed.stack_cleanup_error(@target, arg1.to_i)
 end
 
