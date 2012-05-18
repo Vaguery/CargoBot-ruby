@@ -30,7 +30,7 @@ Feature: Termination conditions
     And the claw should be in position 3
     
     
-  Scenario: Execution should stop if the bot has 'fragile_claw' and it crashes
+  Scenario: Execution should stop if the bot is 'fragile' and it crashes
     Given the bot is created with script "L L L" and 1 stack
     And the bot has a fragile claw
     When I activate the cargobot
@@ -38,9 +38,9 @@ Feature: Termination conditions
     And the number of steps should be 1
     
     
-  Scenario: Execution should stop if the bot has 'fragile_stacks' and a stack topples
+  Scenario: Execution should stop if the bot is 'unstable' and a stack topples
     Given the bot is created with script "claw R claw call1" and 2 stacks
-    And the bot has a height limit of 6
+    And the bot has a height limit of 4
     And the stacks topple the claw bumps them at their height limit
     And stack 1 contains [:red, :red]
     And stack 2 contains [:blue, :blue, :blue, :blue, :blue, :blue]

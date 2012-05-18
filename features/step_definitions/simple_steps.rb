@@ -19,7 +19,7 @@ end
 
 
 Given /^the claw is in position (\d+)$/ do |arg1|
-  @bot.claw_position = arg1.to_i - 1
+  @bot.claw_position = arg1.to_i
 end
 
 
@@ -56,12 +56,12 @@ end
 
 
 Given /^the bot has a fragile claw$/ do
-  @bot.fragile_crashes = true
+  @bot.fragile = true
 end
 
 
 Given /^the stacks topple the claw bumps them at their height limit$/ do
-  @bot.fragile_stacks = true
+  @bot.unstable = true
 end
 
 
@@ -75,13 +75,8 @@ Given /^stack (\d+) contains (\[.+\])$/ do |arg1,arg2|
 end
 
 
-
-
-
-
 When /^I activate the cargobot$/ do
   @bot.activate
-  
 end
 
 
@@ -117,7 +112,7 @@ end
 
 
 Then /^the claw should be in position (\d+)$/ do |arg1|
-  @bot.claw_position.should == arg1.to_i - 1
+  @bot.claw_position.should == arg1.to_i
 end
 
 

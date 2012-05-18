@@ -1,185 +1,159 @@
 class CargoBot
-  attr_accessor :script,:program,:stacks
-  attr_accessor :goal
-  attr_accessor :stack_trace
-  attr_accessor :moves,:steps,:crashes,:topples
-  attr_accessor :old_stacks
-  attr_accessor :height_limit,:step_limit
-  attr_accessor :fragile_crashes,:fragile_stacks
+  attr_accessor :script, :program
+  attr_accessor :stacks, :execution_stack
   attr_accessor :claw_position, :claw_holding
+  attr_accessor :moves, :crashes, :steps, :topples, :broken
+  attr_accessor :step_limit, :height_limit, :goal, :unstable, :fragile
   
   
-  Pointer = Struct.new(:subroutine,:step)
-  
-  
-  def initialize(script="", args = {})
+  def initialize(script="", args={})
     @script = script
-    reset_state(args)
+    load_program(script)
+    load_args(args)
+    @execution_stack = []
   end
   
   
-  def reset_state(args)
-    @pointer = args[:pointer] || Pointer.new(0,0)
-    @stacks = args[:stacks] || [[]]
-    @old_stacks = [[]] 
-    @old_stacks = args[:stacks].collect {|stack| stack.clone} if args[:stacks]
-    @goal = args[:goal] || [[:no, :goal, :was, :set]]
-    @claw_position = args[:claw_position] || 0
-    @claw_holding = args[:claw_holding] || nil
-    @moves = args[:moves] || 0
-    @steps = args[:steps] || 0
-    @crashes = args[:crashes] || 0
-    @topples = args[:topples] || 0
-    @fragile_crashes = args[:fragile_crashes] || false
-    @fragile_stacks = args[:fragile_stacks] || false
-    @height_limit = args[:height_limit] || 6
-    @stack_trace = []
+  def load_args(args)
+    @claw_position = args[:claw_position] || 1
+    @stacks = setup_stacks(args[:stacks])
     @step_limit = args[:step_limit] || 200
-    @done = false
-    self.build_program
+    @goal = args[:goal] || [[:no, :goal, :was, :set]]
+    @height_limit = args[:height_limit] || 6
+    @unstable = args[:unstable] || false
+    @fragile = args[:fragile] || false
   end
   
   
-  def build_program
+  def setup_stacks(stacks)
+    stacks.nil? ? [[]] : stacks
+  end
+  
+  
+  def load_program(script)
     @program = [[]]
+    tokens = script.scan(/\w+/)
     subroutine = 0
-    @script.split.each do |token|
-      if token =~ /prog_(\d)/
+    until tokens.empty?
+      next_token = tokens.shift
+      if next_token =~ /prog_(\d)/
         subroutine = $1.to_i-1
-        add_subroutines_as_needed(subroutine)
+        while @program.length <= subroutine
+          @program.push []
+        end
       else
-        @program[subroutine] << token.intern
+        @program[subroutine].push next_token.intern
       end
     end
-  end
-  
-  
-  def add_subroutines_as_needed(needed_subroutine)
-    (0..needed_subroutine).each do |s|
-      @program[s] = [] if @program[s].nil?
-    end
-  end
-  
-  
-  def handle_nil
-    if @stack_trace.empty?
-      @done = true
-    else
-      @pointer = @stack_trace.pop
-    end
-    @steps -= 1
-  end
-  
-  
-  def handle_R
-    unless @claw_position < @stacks.length-1
-      @claw_position = @stacks.length-1
-      handle_crash
-    else
-      handle_topple if @stacks[@claw_position+1].length >= @height_limit
-      @claw_position += 1
-      @moves += 1
-    end
-  end
-  
-  
-  def handle_L
-    if @claw_position <= 0
-      @claw_position = 0
-      handle_crash
-    else
-      @claw_position -= 1
-      handle_topple if @stacks[@claw_position-1].length >= @height_limit
-      @moves += 1
-    end
-  end
-  
-  
-  def handle_crash
-    @crashes += 1
-    @done = true if @fragile_crashes
-  end
-  
-  
-  def handle_topple
-    @topples += 1
-    @done = true if @fragile_stacks
-  end
-  
-  
-  def handle_claw
-    if @claw_holding.nil?
-      @claw_holding = @stacks[@claw_position].pop
-    else
-      @stacks[@claw_position].push @claw_holding
-      @claw_holding = nil
-    end
-    @moves += 1
-  end
-  
-  
-  def handle_call(which)
-    return if which >= @program.length
-    @stack_trace.push @pointer.clone
-    @pointer.subroutine = which
-    @pointer.step = -1
-  end
-  
-  
-  def willing?(filter)
-    return true if filter.empty?
-    return true if filter == @claw_holding.to_s
-    return true if (filter == "any" && !@claw_holding.nil?)
-    return true if (filter == "none" && @claw_holding.nil?)
-    false
   end
   
   
   def activate
-    until @done
+    @claw_holding = nil
+    @moves = 0
+    @crashes = 0
+    @topples = 0
+    @steps = 0
+    @broken = false
+    @execution_stack = @program[0] + @execution_stack
+    
+    until finished?
       @steps += 1
-      raw_token = @program[@pointer.subroutine][@pointer.step]
-      if raw_token.nil?
-        handle_nil
-      else
-        token,underscore,filter = raw_token.to_s.partition("_")
-        if willing?(filter)
-          case token.intern
-          when :R
-            handle_R
-          when :L
-            handle_L
-          when :claw
-            handle_claw
-          when /call(\d)/
-            handle_call($1.to_i - 1)
-          else
-            # ignore unknown tokens
-          end
-        end
-      end
-      @pointer.step += 1
-      @done = true if @steps >= @step_limit
-      @done = true if @stacks == @goal
+      interpret_token(@execution_stack.shift)
     end
   end
   
   
-  # convenience function for fancy display
-  def show_off
-    puts "           script: #{@script}"
-    puts "   starting state: #{@old_stacks}"
-    puts "        end state: #{@stacks}"
-    puts "             goal: #{@goal}"
-    puts "            steps: #{@steps}"
-    puts "            moves: #{@moves}"
-    puts "          crashes: #{@crashes}"
-    puts "          topples: #{@topples}"
-    puts "stack_trace_depth: #{@stack_trace.length}"
+  def finished?
+    @steps >= @step_limit ||
+    @broken ||
+    @stacks.inspect == @goal.inspect ||
+    @execution_stack.empty?
   end
   
   
+  def handle_L
+    @claw_position -= 1
+    @claw_position < 1 ? record_crash(1) : @moves += 1
+    check_for_topple if @stacks[@claw_position-1].length > @height_limit
+  end
+  
+  
+  def handle_R
+    @claw_position += 1
+    right_edge = @stacks.length
+    @claw_position > right_edge ? record_crash(right_edge) : @moves += 1
+    check_for_topple 
+  end
+  
+  
+  def check_for_topple
+    return unless @stacks[@claw_position-1].length > @height_limit
+    @topples += 1
+    @broken = true if @unstable
+  end
+  
+  
+  def record_crash(where)
+    @claw_position = where
+    @crashes += 1
+    @broken = true if @fragile
+  end
+  
+  
+  def handle_claw
+    @claw_holding.nil? ? pick_up_crate : put_down_crate
+    @moves += 1
+  end
+  
+  
+  def pick_up_crate
+    @claw_holding = @stacks[@claw_position-1].pop
+  end
+  
+  
+  def put_down_crate
+    @stacks[@claw_position-1].push @claw_holding
+    @claw_holding = nil
+  end
+  
+  
+  def handle_call(subroutine)
+    return if subroutine > @program.length
+    @execution_stack = @program[subroutine-1] + @execution_stack
+  end
+  
+  
+  def constraint_satisfied?(condition)
+    return case 
+    when condition.nil?
+      true
+    when condition == "any"
+      @claw_holding.nil? ? false : true
+    when condition == "none"
+      @claw_holding.nil? ? true : false
+    else
+      @claw_holding == condition.intern ? true : false
+    end
+  end
+  
+  
+  def interpret_token(token)
+    case token
+    when /L(_)?(.+)?/
+      handle_L if constraint_satisfied?($2)
+    when /R(_)?(.+)?/      
+      handle_R if constraint_satisfied?($2)
+    when /claw(_)?(.+)?/
+      handle_claw if constraint_satisfied?($2)
+    when /call(\d)(_)?(.+)?/
+      handle_call($1.to_i) if constraint_satisfied?($3)
+    else
+      # ignore tokens I don't recognize
+    end
+  end
 end
+
 
 
 class CrateStacks
