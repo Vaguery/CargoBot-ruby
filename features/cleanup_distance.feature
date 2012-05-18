@@ -60,7 +60,7 @@ Feature: Cleanup distance
     Given the target is [[:y, :y, :y, :r], [:b, :b]]
     And the observed is [[], [:y, :y, :y, :r, :b, :b]]
     When I calculate the cleanup distance for box 4 of stack 1 of the state
-    Then the score for that box should be 7
+    Then the score for that box should be 8
   
   Scenario: score for wrong position in same stack
     Given the target is [[:r, :r, :r, :r, :b, :r]]
@@ -74,6 +74,14 @@ Feature: Cleanup distance
     Then the score for that box should be 8
     
     
+  Scenario: floating block
+    Given the target is [[:r, :r, :r, :b], []]
+    And the observed is [[:r], [:r, :b, :r]]
+    When I calculate the cleanup distance for box 4 of stack 1 of the state
+    Then the score for that box should be 6
+  
+  
+  
     
   
   Scenario: score for a stack sums error for each crate 
@@ -101,10 +109,10 @@ Feature: Cleanup distance
     Then the score for that box should be 7
     
     When I calculate the cleanup distance for box 4 of stack 1 of the state
-    Then the score for that box should be 7
+    Then the score for that box should be 8
     
     When I calculate the cleanup distance for stack 1 of the state
-    Then the score for that stack should be 25
+    Then the score for that stack should be 26
     
     When I calculate the cleanup distance for stack 2 of the state
     Then the score for that stack should be 23
@@ -115,7 +123,7 @@ Feature: Cleanup distance
     Given the target is [[:y, :y, :y, :r], [:b, :b]]
     And the observed is [[], [:y, :y, :y, :r, :b, :b]]
     When I calculate the cleanup distance
-    Then the score should be 48
+    Then the score should be 49
     
   Scenario: the error measure does not have to be symmetric
     Given the target is [[], [:y, :y, :y, :r, :b, :b]]
@@ -124,16 +132,14 @@ Feature: Cleanup distance
     Then the score for that stack should be 10
     
     When I calculate the cleanup distance for stack 2 of the state
-    Then the score for that stack should be 23
+    Then the score for that stack should be 27
     
     When I calculate the cleanup distance
-    Then the score should be 33
+    Then the score should be 37
   
   Scenario: it should work for many arrangements
     Given I have 100 arbitrary target:objective pairs with 5 stacks and 5 crates each
     When I calculate the cleanup distance for the random pairs
     Then the score should be a numerical value
-  
-  
   
   

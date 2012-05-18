@@ -209,6 +209,8 @@ class CrateStacks
       adding_missing_boxes = @stacks[stack].length-1 < box ? (box + 1 - @stacks[stack].length) : 0
       shifting_extra_boxes = @stacks[stack].length-1 > box ? (@stacks[stack].length - box) : 0
       grabbing_a_replacement = possible_replacements.min
+      
+      grabbing_a_replacement = adding_missing_boxes if grabbing_a_replacement < adding_missing_boxes
       if this_stack_replacement == grabbing_a_replacement
         if this_stack_replacement < shifting_extra_boxes
           return shifting_extra_boxes + 1
@@ -216,7 +218,7 @@ class CrateStacks
           return 2*this_stack_replacement - (@stacks[stack].length-box) + 1
         end
       else
-        return shifting_extra_boxes + adding_missing_boxes + grabbing_a_replacement
+        return shifting_extra_boxes + grabbing_a_replacement + adding_missing_boxes 
       end
     end
   end
