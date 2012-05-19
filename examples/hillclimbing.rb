@@ -4,28 +4,6 @@ require_relative '../lib/cargobot'
 @meta_tokens = %w{ prog_1 prog_2 prog_3 prog_4}
 @modifiers = %w{ r g b y any none}
 
-
-def random_token_array(length)
-  length.times.collect do
-    random_token
-  end
-end
-
-def random_token
-  token = (@program_tokens+@meta_tokens).sample
-  token = "#{token}_#{@modifiers.sample}" if @program_tokens.include?(token) && rand < 0.2
-  token
-end
-
-def mutate_token_array(array, max_length = 32)
-  mutie = array.clone
-  mutie[rand(mutie.length)] = random_token
-  mutie = mutie.delete_if {rand < (1.0/mutie.length) && mutie.length > 10}
-  mutie = mutie.each_with_index {|t,i| mutie.insert(i,random_token) if rand < 0.04 && mutie.length < max_length}
-  mutie
-end
-
-
 # Lay It Out (medium)
 # setup = [[:g,:g,:g,:g,:g,:g],[],[],[],[],[]]
 # target = [[:g],[:g],[:g],[:g],[:g],[:g]]
@@ -112,9 +90,9 @@ end
 
 
 # Walking Piles (easy)
-# target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
-# setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
-# claw_position = 1
+target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
+setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
+claw_position = 1
 # Successful programs:
 # call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
 # call3 call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
@@ -159,35 +137,98 @@ end
 # claw R R L call2_g R_b call3 prog_3 L_none L L claw_none R R R claw call3
 # claw R R L call2 R_b call3 prog_3 L_none L L claw_none R R R claw call3
 
+# # Vertical Sort (Impossible)
+# target = [[],[:g, :g, :b, :b, :b],[:g, :b, :b],[:g, :g, :b, :b],[:g, :b],[:g, :g, :g, :b, :b],[]]
+# setup =  [[],[:g, :b, :g, :b, :b],[:b, :g, :b],[:g, :b, :b, :g],[:b, :g],[:b, :g, :g, :g, :b],[]]
+# claw_position = 2
+
+# # Lay It Out REVERSE
+# target = [[:g,:g,:g,:g,:g,:g],[],[],[],[],[]]
+# setup = [[:g],[:g],[:g],[:g],[:g],[:g]]
+# claw_position = 1
+
+# # # Mirror REVERSE
+# target = [[:y, :y, :y, :y],[:g, :g],[:g],[:g],[:g, :g],[]]
+# setup = [[],[:g, :g],[:g],[:g],[:g, :g],[:y, :y, :y, :y]]
+# claw_position = 1
 
 
-
-wildtype_tokens = random_token_array(30)
-wildtype = CargoBot.new(wildtype_tokens.join(" "), stacks:setup.collect {|stack| stack.clone}, goal:target, claw_position:claw_position)
-wildtype.activate
-wildtype_err = CrateStacks.new(wildtype.stacks).cleanup_error(CrateStacks.new target)
-
-puts "#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes}"
+# # The Swap REVERSE
+# setup = [[:g, :g, :g], [], [:r, :r, :r]]
+# target = [[:r, :r, :r], [],[:g, :g, :g]]
+# claw_position = 2
 
 
-bests = {wildtype.script => [wildtype_err,wildtype.crashes]}
-until bests.values.count([0,0]) > 20 do
-  mutant_tokens = mutate_token_array(wildtype_tokens)
-  mutant = CargoBot.new(mutant_tokens.join(" "),
-    stacks:setup.collect {|stack| stack.clone}, goal:target, claw_position:claw_position)
-  mutant.activate
-  mutant_err = CrateStacks.new(mutant.stacks).cleanup_error(CrateStacks.new target)
-  
-  if (mutant_err <= wildtype_err) && (mutant.crashes <= wildtype.crashes+1) && (bests[mutant.script].nil?)
-    bests[mutant.script] = [mutant_err,mutant.crashes]
-    wildtype_tokens = mutant_tokens
-    wildtype = mutant
-    wildtype_err = mutant_err
-    puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}, #{mutant.script}"
+# # Tozier's Bane (yes I made it up)
+# setup = [[:g, :g, :g], [], [:r, :r, :r], [], [:b, :b, :b], [], [:y, :y, :y]]
+# target = [[:g, :b, :r],[:y],[:r, :g, :b],[:y],[:b, :r, :g],[:y],[]]
+# claw_position = 1
+
+
+def random_token_array(length)
+  length.times.collect do
+    random_token
   end
 end
 
-puts "\n\nSuccessful programs:"
-bests.each do |k,v|
-  puts k if v[0]==0 && v[1]==0
+def random_token
+  token = (@program_tokens+@meta_tokens).sample
+  token = "#{token}_#{@modifiers.sample}" if @program_tokens.include?(token) && rand < 0.2
+  token
+end
+
+
+def mutate_token_array(array, max_length = 32)
+  mutie = array.clone
+  mutie[rand(mutie.length)] = random_token
+  mutie = mutie.delete_if {rand < (1.0/mutie.length) && mutie.length > 10}
+  mutie = mutie.each_with_index do |t,i|
+    mutie.insert(i,random_token) if rand < 0.04 && mutie.length < max_length
+  end
+  mutie
+end
+
+
+File.open("hillclimbing.csv", "w+") do |results_file|
+  wildtype_tokens = random_token_array(30)
+  wildtype = CargoBot.new(
+    wildtype_tokens.join(" "),
+    stacks:setup.collect {|stack| stack.clone},
+    goal:target, 
+    claw_position:claw_position,
+    step_limit:200)
+  wildtype.activate
+  wildtype_err = CrateStacks.new(wildtype.stacks).cleanup_error(CrateStacks.new target)
+  
+  results_file.puts
+    "1,#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.script.inspect}"
+    
+  bests = {wildtype.script => [wildtype_err,wildtype.crashes]}
+  until bests.values.count([0,0]) > 20 do
+    mutant_tokens = mutate_token_array(wildtype_tokens)
+    mutant = CargoBot.new(
+      mutant_tokens.join(" "),
+      stacks:setup.collect {|stack| stack.clone},
+      goal:target,
+      claw_position:claw_position,
+      step_limit:200)
+    mutant.activate
+    mutant_err = CrateStacks.new(mutant.stacks).cleanup_error(CrateStacks.new target)
+  
+    if (mutant_err <= wildtype_err) && 
+        (mutant.crashes <= wildtype.crashes) && 
+        (bests[mutant.script].nil?)
+      bests[mutant.script] = [mutant_err,mutant.crashes]
+      wildtype_tokens = mutant_tokens
+      wildtype = mutant
+      wildtype_err = mutant_err
+      results_file.puts
+        "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}, #{mutant.script.inspect}"
+      puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}"
+    end
+  end
+  
+  bests.each do |k,v|
+    puts "# #{k.inspect}" if v[0]==0 && v[1]==0
+  end
 end
