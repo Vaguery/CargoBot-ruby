@@ -52,57 +52,62 @@ In this `CargoBot` representation, the available positions in the "dock" are rep
 For example, to set up a "factory" with six stacks, where stack 3 contains three blue and stack 4 two red boxes, you can use the Ruby code
 
     [[], [], [:b, :b, :b], [:r, :r], [], []]
+    
+I'll refer to the left stack as "stack 1", and the left/first item on a stack as being on the "bottom" (following the Ruby idiom of `Array#push` and `Array#pop` affecting the rightmost items on Array objects).
 
 ### Program Execution
 
-`CargoBot.activate` places the execution pointer at the first token of the first subroutine, executes it, and moves on. When a `call` token is interpreted, the current pointer is saved in a call stack, and the pointer jumps  to the first token in the called subroutine. When the last token in a called subroutine is executed, the call stack is popped to reset the execution pointer to just after the `call`.
+The method `CargoBot#activate` resets various counters (used for evaluating the performance of a program) and flags, then operates *every simply*:
+
+1. all the tokens in subroutine 1 are pushed onto the top of the **execution stack**
+2. until a termination condition is achieved (see below), one token is popped from the execution stack and interpreted; if the token is a `call[N]` token, then every token in subroutine `N` is pushed immediately onto the execution stack; otherwise, the claw is moved and the state of the bot is updated accordingly
 
 ### Termination conditions
 
-1. If the pointer reaches the last token of the root subroutine, the program terminates.
-1. Infinite loops are of course possible. A step counter limits the number of tokens interpreted.
-1. If the CargoBot's `stacks` of boxes match the `target` at any point in execution, it halts.
-1. *If the `fragile_claw` flag is set*, and the claw tries to leave the "box" at any point during execution, it breaks and the program halts immediately.
-1. *If the `fragile_stacks` flag is set*, and the claw tries to enter a position where a stack is higher than the `height_limit`, the stack topples and the program halts immediately.
+1. If the execution stack is empty, the program terminates.
+1. Infinite loops are of course possible. A step counter limits the number of tokens interpreted (default=200).
+1. If the CargoBot's `stacks` of boxes match its `goal` after any step, execution halts.
+1. *If the `fragile` flag is set*, and the claw tries to leave the "box" at any point during execution, it breaks, and the program halts immediately.
+1. *If the `unstable` flag is set*, and the claw tries to enter a position where a stack is higher than the `height_limit`, the stack topples and the program halts immediately.
 
-### Extensions
+### Differences from the iPad game
 
 As you may have noticed, there are a few extensions of the `CargoBot` class compared with the implementation in Rui's game.
 
-- The `fragile_claw` argument determines whether the claw will crash into a wall, or merely "bump" and stay where it is. The instance variable `CargoBot#crashes` records the number of crashes if the flag isn't set.
-- The `fragile_stacks` toggle determines whether there's a height limit on stacks. If it's set, and the claw tries to enter a position where a stack is at (or over) the `CargoBot#height_limit`, execution ends. Otherwise, the variable `CargoBot#topples` records the number of times this constraint is violated.
+- The `fragile` flag determines whether the claw will crash into a wall, or merely "bump" and stay where it is. The instance variable `CargoBot#crashes` records the number of crashes if the flag isn't set.
+- The `unstable` flag determines whether there's a height limit on stacks. If it's set, and the claw tries to enter a position where a stack is at (or over) the `CargoBot#height_limit`, execution ends. Otherwise, the variable `CargoBot#topples` records the number of times this constraint is violated.
 - There is no *explicit* limit on the number of subroutines or tokens in each one
-- Any symbol can be used as a block 'color' except `:any` or `none`. Any filtered instructions do simple string-matching to trigger, so the token `R_red` will only ever fire if the claw is holding a `:red` block, not a `:r` or some other one
-- Infinite loops are cut off at the `CargoBot#step_limit`
+- Any symbol can be used as a block 'color' except `:any` or `none`. Any filtered instructions do simple string-matching to trigger, so the token `R_red` will only ever fire if the claw is holding a `:red` block, not one labeled `:r` 
+- Infinite loops are cut off by `CargoBot#step_limit`
 - The running `CargoBot` instance records the number of `steps` (tokens interpreted), `moves` (L, R and claw moves only), `crashes`, `topples`
-- Any `CargoBot` created without a `#target` has a *very* unlikely target set as a default; it probably won't ever end successfully
+- Any `CargoBot` created without a `#goal` has a *very* unlikely goal set as a default; it probably won't ever end successfully
 
 
 ## Creating and activating a CargoBot instance
 
 As far as I can tell, all the game's mechanics are captured here, with arguments and instance variables controlling the behavior and state of the bot's execution:
 
-`CargoBot.new("script")` is the basic call to create an instance, but it will have no blocks or target.
+`CargoBot.new("script")` is the basic call to create an instance, but it will have no blocks, and a very unlikely `goal`.
 
 Everything but the script itself can be accessed via hash arguments:
 
 - `:stacks` should be set to the initial set of piles of boxes; it should be an Array of Arrays, containing symbols indicating the colors of boxes. The 'top' of a stack is considered to be the last element, as in Ruby's stack-handling Array methods `Array#pop` and `Array#push`.
 - `:goal` should also be an Array of Arrays of Symbols. Note that if the boxes in the `goal` don't match the `stacks`, your CargoBot might have a problem finishing the puzzle....
 - `:claw_position` is an Integer indicating which stack the claw is above (0-based); default is 0
-- `:claw_holding` is a Symbol indicating what color block the claw is holding, or `nil` if none
-- `:moves` is the number of `L`, `R` and `claw` tokens *actually executed*; skipped or filtered instructions aren't counted
-- `:steps` is the count of tokens interpreted (including `calls`)
-- `:crashes` is the number of times the claw tries to "leave the box" by moving left from position 0, or right beyond the last of its `stacks`
-- `:topples` is the number of times the claw tries to enter a stack position where the number of boxes is at least `height_limit`
-- `:fragile_crashes` is a toggle which determines whether the claw breaks (crashing the CargoBot) when it tries to "leave the box"
-- `:fragile_stacks` is a toggle which determines whether the machine breaks down when it the claw knocks over a stack of blocks that's too high
+- `:fragile` is a toggle which determines whether the claw breaks (crashing the CargoBot) when it tries to "leave the box"
+- `:unstable` is a toggle which determines whether the machine breaks down when it the claw knocks over a stack of blocks that's too high
 - `:height_limit` the maximum height a stack is allowed to get before toppling when the claw bumps it
 - `:step_limit` termination condition to avoid loops; defaults to 200
+
+## Evaluating performance
+
+I've included an evaluation method (in a separate class currently called `CrateStacks`) which estimates the number of crates which have to be moved to change an observed arrangement of crates into a target arrangement. This is an intentionally unrealistic heuristic, but (apparently) one useful for search.
 
 ## Examples
 
 See http://github.com/Vaguery/CargoBot-ruby/tree/master/examples for some simple calls and demos (TBD). Run [the acceptance test cucumber file](http://github.com/Vaguery/CargoBot-ruby/blob/master/features/acceptance_tests.feature) to check to see that the Cargo-Bot tutorial examples are running.
 
+I've also included a brief (and very kludgy) example that uses (multiobjective) hillclimbing to search for solutions to particular problems. Sometimes it works, sometimes it doesn't; don't treat it as anything but an experiment.
 
 ## Quirks
 
