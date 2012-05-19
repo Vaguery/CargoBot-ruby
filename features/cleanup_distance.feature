@@ -20,12 +20,6 @@ Feature: Cleanup distance
     When I calculate the cleanup distance for box 2 of stack 1
     Then the score for that box should be 2
     
-  Scenario: +100 if target box is totally missing
-    Given the target is [[:r]]
-    And the observed is [[]]
-    When I calculate the cleanup distance for box 1 of stack 1
-    Then the score for that box should be 100
-  
   Scenario: count boxes moved when retrieving replacement
     Given the target is [[:r], [:b,:b]]
     And the observed is [[],[:r,:b,:b]]
@@ -134,6 +128,18 @@ Feature: Cleanup distance
     
     When I calculate the cleanup distance
     Then the score should be 37
+  
+  Scenario: the presence of extra boxes should be penalized
+    Given the target is [[]]
+    And the observed is [[:r, :r]]
+    When I calculate the cleanup distance
+    Then the score should be 203
+    
+  Scenario: the lack of needed boxes should be penalized
+    Given the target is [[:r, :r]]
+    And the observed is [[]]
+    When I calculate the cleanup distance
+    Then the score should be 200
   
   
   Scenario: it should provide a numeric answer for arbitrary rearrangements

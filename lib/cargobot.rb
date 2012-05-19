@@ -187,7 +187,7 @@ class CrateStacks
       return 0 
     else
       possible_replacements = topmost_matches(expected_box)
-      return 100 if possible_replacements.empty?
+      return 0 if possible_replacements.empty?
       
       this_stack_replacement = @stacks[stack].rindex(expected_box).nil? ?
         nil :
@@ -226,10 +226,15 @@ class CrateStacks
   
   
   def cleanup_error(target)
-    target.stacks.each_with_index.inject(0) do |sum,(stack,idx)|
+    stack_error = target.stacks.each_with_index.inject(0) do |sum,(stack,idx)|
       sum + stack_cleanup_error(target,idx+1)
     end
+    
+    extra_boxes_error = (target.stacks.flatten.length - @stacks.flatten.length).abs*100
+    
+    stack_error + extra_boxes_error
   end
+  
   
   def topmost_matches(crate)
     @stacks.collect {|s| (s.length - s.rindex(crate)) unless s.rindex(crate).nil?}.compact
