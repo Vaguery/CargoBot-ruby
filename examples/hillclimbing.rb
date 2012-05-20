@@ -198,10 +198,9 @@ File.open("hillclimbing.csv", "w+") do |results_file|
     claw_position:claw_position,
     step_limit:200)
   wildtype.activate
-  wildtype_err = CrateStacks.new(wildtype.stacks).cleanup_error(CrateStacks.new target)
+  wildtype_err = CrateStacks.new(wildtype.stacks).teardown_distance(CrateStacks.new target)
   
-  results_file.puts
-    "1,#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.script.inspect}"
+  results_file.puts "1,#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.topples},#{wildtype.script.inspect}"
     
   bests = {wildtype.script => [wildtype_err,wildtype.crashes]}
   until bests.values.count([0,0]) > 20 do
@@ -213,7 +212,7 @@ File.open("hillclimbing.csv", "w+") do |results_file|
       claw_position:claw_position,
       step_limit:200)
     mutant.activate
-    mutant_err = CrateStacks.new(mutant.stacks).cleanup_error(CrateStacks.new target)
+    mutant_err = CrateStacks.new(mutant.stacks).teardown_distance(CrateStacks.new target)
   
     if (mutant_err <= wildtype_err) && 
         (mutant.crashes <= wildtype.crashes) && 
@@ -222,9 +221,8 @@ File.open("hillclimbing.csv", "w+") do |results_file|
       wildtype_tokens = mutant_tokens
       wildtype = mutant
       wildtype_err = mutant_err
-      results_file.puts
-        "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}, #{mutant.script.inspect}"
-      puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes}"
+      results_file.puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}, #{mutant.script.inspect}"
+      puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}"
     end
   end
   

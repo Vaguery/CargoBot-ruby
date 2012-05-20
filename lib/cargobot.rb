@@ -235,6 +235,24 @@ class CrateStacks
     stack_error + extra_boxes_error
   end
   
+  def teardown_distance(target)
+    stackwise_error = target.stacks.each_with_index.inject(0) do |sum,(stack,idx)|
+      my_ht, target_ht = @stacks[idx].length, stack.length
+      mismatched_blocks = 0
+      last_match = (0..target_ht).detect {|i| stack[i] != @stacks[idx][i] }
+      mismatched_blocks += (last_match.nil? ? 0 : target_ht - last_match)
+      sum + mismatched_blocks
+    end
+    anomalies = unshared_items(target.stacks.flatten,@stacks.flatten)
+    stackwise_error + anomalies*100
+  end
+  
+  def unshared_items(array_1,array_2)
+    examples = array_1 | array_2
+    examples.inject(0) do |count,item|
+      count + (array_1.count(item) - array_2.count(item)).abs
+    end
+  end
   
   def topmost_matches(crate)
     @stacks.collect {|s| (s.length - s.rindex(crate)) unless s.rindex(crate).nil?}.compact

@@ -25,16 +25,22 @@ guesses = 10000.times.collect do
   c = CargoBot.new(dude, stacks:setup.collect {|stack| stack.clone}, goal:target, fragile_claw:true)
   c.activate
   
-  err = CrateStacks.new(c.stacks).cleanup_error(CrateStacks.new c.goal)
-  puts "#{err},#{c.steps},#{c.moves},#{c.crashes}"
-  {error:err,moves:c.moves,dude:c}
+  err_1 = CrateStacks.new(c.stacks).cleanup_error(CrateStacks.new c.goal)
+  err_2 = CrateStacks.new(c.stacks).teardown_distance(CrateStacks.new c.goal)
+  puts "#{err_1},#{err_2},#{c.steps},#{c.moves},#{c.crashes}"
+  {error_1:err_1,error_2:err_2,moves:c.moves,dude:c}
 end
 
-range = guesses.collect {|g| g[:error]}.minmax
-puts "min and max errors found: #{range.inspect}\n\nbest:\n"
-best =  guesses.find_all {|g| g[:error] == range[0]}
+range_1 = guesses.collect {|g| g[:error_1]}.minmax
+range_2 = guesses.collect {|g| g[:error_2]}.minmax
+
+puts "\n\nmin and max cleanup errors found: #{range_1.inspect}"
+puts "min and max teardown distances found: #{range_2.inspect}\n\nbest:\n"
+
+best =  guesses.find_all {|g| g[:error_1] == range_1[0] || g[:error_2] == range_2[0]}
 
 best.each do |good_one|
+  puts "\ncleanup: #{good_one[:error_1]}, teardown: #{good_one[:error_2]}"
+  
   good_one[:dude].show_off
-  puts "\n"
 end
