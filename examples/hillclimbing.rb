@@ -33,9 +33,9 @@ require_relative '../lib/cargobot'
 
 
 # # Mirror (medium)
-# setup = [[:y, :y, :y, :y],[:g, :g],[:g],[:g],[:g, :g],[]]
-# target = [[],[:g, :g],[:g],[:g],[:g, :g],[:y, :y, :y, :y]]
-# claw_position = 1
+setup = [[:y, :y, :y, :y],[:g, :g],[:g],[:g],[:g, :g],[]]
+target = [[],[:g, :g],[:g],[:g],[:g, :g],[:y, :y, :y, :y]]
+claw_position = 1
 # Successful programs:
 # R_y claw_none claw_g R claw L call1 R call2 R R R L R_any claw
 # R_y claw_none claw_g R claw L call1 R call2 R R R L R_any claw_r
@@ -90,9 +90,9 @@ require_relative '../lib/cargobot'
 
 
 # Walking Piles (easy)
-target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
-setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
-claw_position = 1
+# target = [[],[],[],[],[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b]]
+# setup = [[:b,:b,:b,:b],[:b,:b,:b,:b],[:b,:b,:b,:b],[],[],[],[]]
+# claw_position = 1
 # Successful programs:
 # call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
 # call3 call3 prog_3 R R claw L prog_3 L_none L claw_none R call3
@@ -198,12 +198,13 @@ File.open("hillclimbing.csv", "w+") do |results_file|
     claw_position:claw_position,
     step_limit:200)
   wildtype.activate
-  wildtype_err = CrateStacks.new(wildtype.stacks).teardown_distance(CrateStacks.new target)
-  
-  results_file.puts "1,#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.topples},#{wildtype.script.inspect}"
+  wildtype_err = CrateStacks.new(wildtype.stacks).rebuild_distance(CrateStacks.new target)
+  counter = 1
+  results_file.puts "#{counter},1,#{wildtype_err},#{wildtype.steps},#{wildtype.moves},#{wildtype.crashes},#{wildtype.topples},#{wildtype.script.inspect}"
     
   bests = {wildtype.script => [wildtype_err,wildtype.crashes]}
-  until bests.values.count([0,0]) > 20 do
+  until bests.values.count([0,0,0]) > 20 do
+    counter += 1
     mutant_tokens = mutate_token_array(wildtype_tokens)
     mutant = CargoBot.new(
       mutant_tokens.join(" "),
@@ -212,17 +213,18 @@ File.open("hillclimbing.csv", "w+") do |results_file|
       claw_position:claw_position,
       step_limit:200)
     mutant.activate
-    mutant_err = CrateStacks.new(mutant.stacks).teardown_distance(CrateStacks.new target)
+    mutant_err = CrateStacks.new(mutant.stacks).rebuild_distance(CrateStacks.new target)
   
     if (mutant_err <= wildtype_err) && 
-        (mutant.crashes <= wildtype.crashes) && 
+        (mutant.crashes <= wildtype.crashes) &&
+        (mutant.topples <= wildtype.topples) && 
         (bests[mutant.script].nil?)
-      bests[mutant.script] = [mutant_err,mutant.crashes]
+      bests[mutant.script] = [mutant_err,mutant.crashes,mutant.topples]
       wildtype_tokens = mutant_tokens
       wildtype = mutant
       wildtype_err = mutant_err
-      results_file.puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}, #{mutant.script.inspect}"
-      puts "#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}"
+      results_file.puts "#{counter},#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}, #{mutant.script.inspect}"
+      puts "#{counter},#{bests.length},#{mutant_err},#{mutant.steps},#{mutant.moves},#{mutant.crashes},#{mutant.topples}"
     end
   end
   

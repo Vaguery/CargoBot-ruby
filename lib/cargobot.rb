@@ -235,6 +235,27 @@ class CrateStacks
     stack_error + extra_boxes_error
   end
   
+  
+  def rebuild_distance(target)
+    raw_materials = @stacks.collect {|stack| stack.clone}
+    score = 0
+    
+    target.stacks.each_with_index do |target_stack, stack_idx|
+      target_stack.each do |wanted_item|
+        source_stack = raw_materials.find_index {|s| s.include? wanted_item}
+        if source_stack.nil?
+          score += 100
+        else
+          height = raw_materials[source_stack].find_index(wanted_item)
+          raw_materials[source_stack].delete_at height
+          score += (source_stack-stack_idx).abs + height
+        end
+      end
+    end
+    return score + 100*raw_materials.flatten.length
+  end
+  
+  
   def teardown_distance(target)
     stackwise_error = target.stacks.each_with_index.inject(0) do |sum,(stack,idx)|
       my_ht, target_ht = @stacks[idx].length, stack.length
