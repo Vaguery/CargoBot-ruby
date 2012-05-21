@@ -33,9 +33,9 @@ require_relative '../lib/cargobot'
 
 
 # # Mirror (medium)
-setup = [[:y, :y, :y, :y],[:g, :g],[:g],[:g],[:g, :g],[]]
-target = [[],[:g, :g],[:g],[:g],[:g, :g],[:y, :y, :y, :y]]
-claw_position = 1
+# setup = [[:y, :y, :y, :y],[:g, :g],[:g],[:g],[:g, :g],[]]
+# target = [[],[:g, :g],[:g],[:g],[:g, :g],[:y, :y, :y, :y]]
+# claw_position = 1
 # Successful programs:
 # R_y claw_none claw_g R claw L call1 R call2 R R R L R_any claw
 # R_y claw_none claw_g R claw L call1 R call2 R R R L R_any claw_r
@@ -137,10 +137,10 @@ claw_position = 1
 # claw R R L call2_g R_b call3 prog_3 L_none L L claw_none R R R claw call3
 # claw R R L call2 R_b call3 prog_3 L_none L L claw_none R R R claw call3
 
-# # Vertical Sort (Impossible)
-# target = [[],[:g, :g, :b, :b, :b],[:g, :b, :b],[:g, :g, :b, :b],[:g, :b],[:g, :g, :g, :b, :b],[]]
-# setup =  [[],[:g, :b, :g, :b, :b],[:b, :g, :b],[:g, :b, :b, :g],[:b, :g],[:b, :g, :g, :g, :b],[]]
-# claw_position = 2
+# Vertical Sort (impossible)
+setup = [[], [:g, :b, :g, :b, :b], [:b, :g, :b], [:g, :b, :b, :g], [:b, :g], [:b, :g, :g, :g, :b], []]
+target = [[], [:g, :g, :b, :b, :b], [:g, :b, :b], [:g, :g, :b, :b], [:g, :b], [:g, :g, :g, :b, :b], []]
+claw_position = 1
 
 # # Lay It Out REVERSE
 # target = [[:g,:g,:g,:g,:g,:g],[],[],[],[],[]]
