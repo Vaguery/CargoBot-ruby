@@ -1,4 +1,4 @@
-Feature: Chapter 1 subroutines
+Feature: Cargo-bot emulator subroutines
 
 Background: a bot exists
   Given I have a new cargobot

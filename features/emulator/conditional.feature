@@ -1,4 +1,4 @@
-Feature: Chapter 1 conditionals
+Feature: Cargo-bot emulator conditionals
 
 Background: a bot exists
   Given I have a new cargobot
@@ -27,4 +27,4 @@ Scenario: 'none' filters
   And the pallets are [[],[red],[],[blue,red]]
   When I activate the cargobot
   Then the pallets should be [[red], [], [], [blue,red]]
-  And the claw will not be crashed
+  And the claw should not be crashed

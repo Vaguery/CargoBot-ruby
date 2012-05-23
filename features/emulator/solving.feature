@@ -1,4 +1,4 @@
-Feature: Chapter 1 solving
+Feature: Cargo-bot emulator solving
 
 Background: a bot exists
   Given I have a new cargobot

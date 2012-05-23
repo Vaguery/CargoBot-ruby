@@ -1,4 +1,4 @@
-Feature: Chapter1 claw
+Feature: Cargo-bot emulator claw
 
 Background: a bot exists
   Given I have a new cargobot
@@ -16,7 +16,7 @@ Scenario: Empty claw picks up crates
   And the claw is over pallet 1
   When I activate the cargobot
   Then the claw should be over pallet 2
-  And the claw should hold a red box
+  And the claw should hold a red crate
   And the pallets should be [[blue],[]]
 
 Scenario: Claw with crate sets it down
